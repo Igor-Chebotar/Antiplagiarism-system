@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # PostgreSQL for File Storing Service
+  postgres-files:
+    image: postgres:15-alpine
+    container_name: postgres-files
+    environment:
+      POSTGRES_DB: filestorage
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-files-data:/var/lib/postgresql/data
+    networks:
+      - antiplagiarism-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL for File Analysis Service
+  postgres-analysis:
+    image: postgres:15-alpine
+    container_name: postgres-analysis
+    environment:
+      POSTGRES_DB: analysis
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-analysis-data:/var/lib/postgresql/data
+    networks:
+      - antiplagiarism-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # File Storing Service
+  file-storing-service:
+    build:
+      context: ./file-storing-service
+      dockerfile: Dockerfile
+    container_name: file-storing-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres-files:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-files:5432/filestorage
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    volumes:
+      - file-uploads:/app/uploads
+    networks:
+      - antiplagiarism-network
+    restart: on-failure
+
+  # File Analysis Service
+  file-analysis-service:
+    build:
+      context: ./file-analysis-service
+      dockerfile: Dockerfile
+    container_name: file-analysis-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres-analysis:
+        condition: service_healthy
+      file-storing-service:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-analysis:5432/analysis
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      FILE_STORING_SERVICE_URL: http://file-storing-service:8081
+    networks:
+      - antiplagiarism-network
+    restart: on-failure
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - file-storing-service
+      - file-analysis-service
+    environment:
+      FILE_STORING_SERVICE_URL: http://file-storing-service:8081
+      FILE_ANALYSIS_SERVICE_URL: http://file-analysis-service:8082
+    networks:
+      - antiplagiarism-network
+    restart: on-failure
+
+networks:
+  antiplagiarism-network:
+    driver: bridge
+
+volumes:
+  postgres-files-data:
+  postgres-analysis-data:
+  file-uploads:

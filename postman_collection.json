@@ -1,0 +1,305 @@
+{
+  "info": {
+    "name": "Antiplagiarism System API",
+    "description": "API collection for testing the Antiplagiarism microservices system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "API Gateway",
+      "item": [
+        {
+          "name": "Submit Work",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "/path/to/your/work.txt"
+                },
+                {
+                  "key": "studentName",
+                  "value": "Иван Иванов",
+                  "type": "text"
+                },
+                {
+                  "key": "assignmentId",
+                  "value": "homework-1",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/works",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "works"]
+            },
+            "description": "Submit a student work for plagiarism checking"
+          }
+        },
+        {
+          "name": "Get Reports by Work ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/works/:workId/reports",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "works", ":workId", "reports"],
+              "variable": [
+                {
+                  "key": "workId",
+                  "value": "YOUR_WORK_ID_HERE"
+                }
+              ]
+            },
+            "description": "Get all plagiarism reports for a specific work"
+          }
+        },
+        {
+          "name": "Get Word Cloud",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/works/:workId/wordcloud?maxWords=30",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "works", ":workId", "wordcloud"],
+              "query": [
+                {
+                  "key": "maxWords",
+                  "value": "30"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "workId",
+                  "value": "YOUR_WORK_ID_HERE"
+                }
+              ]
+            },
+            "description": "Get word cloud data (word frequencies) for a specific work - BONUS FEATURE"
+          }
+        },
+        {
+          "name": "Health Check - Gateway",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "File Storing Service",
+      "item": [
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "/path/to/your/file.txt"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8081/files",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["files"]
+            },
+            "description": "Direct file upload to File Storing Service"
+          }
+        },
+        {
+          "name": "Get File Metadata",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/files/:fileId",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["files", ":fileId"],
+              "variable": [
+                {
+                  "key": "fileId",
+                  "value": "YOUR_FILE_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get File Content",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/files/:fileId/content",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["files", ":fileId", "content"],
+              "variable": [
+                {
+                  "key": "fileId",
+                  "value": "YOUR_FILE_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Health Check - File Storing",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/files/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["files", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "File Analysis Service",
+      "item": [
+        {
+          "name": "Create Work and Start Analysis",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"fileId\": \"YOUR_FILE_ID\",\n    \"studentName\": \"Петр Петров\",\n    \"assignmentId\": \"homework-1\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/analysis",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["analysis"]
+            },
+            "description": "Direct work creation and analysis start"
+          }
+        },
+        {
+          "name": "Get Reports for Work",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/analysis/reports/:workId",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["analysis", "reports", ":workId"],
+              "variable": [
+                {
+                  "key": "workId",
+                  "value": "YOUR_WORK_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Specific Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/analysis/reports/work/:reportId",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["analysis", "reports", "work", ":reportId"],
+              "variable": [
+                {
+                  "key": "reportId",
+                  "value": "YOUR_REPORT_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Word Cloud (Direct)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/analysis/wordcloud/:workId?maxWords=30",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["analysis", "wordcloud", ":workId"],
+              "query": [
+                {
+                  "key": "maxWords",
+                  "value": "30"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "workId",
+                  "value": "YOUR_WORK_ID_HERE"
+                }
+              ]
+            },
+            "description": "Direct word cloud generation - BONUS FEATURE"
+          }
+        },
+        {
+          "name": "Health Check - Analysis",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/analysis/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["analysis", "health"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
