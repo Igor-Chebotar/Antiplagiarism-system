@@ -31,3 +31,5 @@ uploads/
 
 # Docker
 .docker/
+
+project_tree.txt
